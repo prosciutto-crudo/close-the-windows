@@ -12,12 +12,16 @@ Runs entirely in the cloud via GitHub Actions. Nothing runs locally.
 - `monitor.py` (stdlib only — no dependencies) calls the WU PWS current-observation
   API, reads the temperature in Celsius, and compares it to the threshold.
 - It notifies **only on an upward crossing**: one ping when the temperature rises
-  above 24 °C, then silence until it drops back below and rises again.
+  above 24 °C — then it's done for the day.
 - `state.json` (`{"above": true/false}`) remembers whether we were last above the
   threshold. The workflow commits it back only when it flips, so there's no commit spam.
-- `.github/workflows/monitor.yml` runs every 15 minutes during daytime
-  (≈07:00–23:00 Europe/Madrid) and can also be triggered manually via
-  **Actions → Temperature monitor → Run workflow**.
+- `.github/workflows/monitor.yml` runs every 5 minutes during daytime
+  (≈07:00–23:00 Europe/Madrid). Once it sends the daily alert it **disables itself**
+  to save Actions minutes — there's no point checking again until it cools off overnight.
+- `.github/workflows/rearm.yml` runs at ≈07:00 Europe/Madrid each morning to reset
+  the state and re-enable the monitor.
+- Both workflows have a manual **Run workflow** button (Actions tab) as a safety valve —
+  e.g. if you ever need to re-enable the monitor by hand.
 
 ## Configuration
 

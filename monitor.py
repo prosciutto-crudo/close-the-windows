@@ -101,11 +101,15 @@ def main() -> None:
           f"was_above={was_above} now_above={now_above}")
 
     if now_above and not was_above:
-        title = "Close the windows \U0001F525"
+        title = "Close the windows"
         message = (f"It's {temp:.1f} C outside (above {threshold:.0f} C). "
                    f"Time to shut the windows and blinds.")
         send_pushover(pushover_user, pushover_token, title, message)
         print("Crossed above threshold -> Pushover notification sent.")
+        github_output = os.environ.get("GITHUB_OUTPUT")
+        if github_output:
+            with open(github_output, "a") as f:
+                f.write("notified=true\n")
     elif not now_above and was_above:
         print("Dropped back below threshold -> re-armed, no notification.")
     else:

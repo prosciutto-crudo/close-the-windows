@@ -2,17 +2,21 @@ name: Temperature monitor
 
 on:
   schedule:
-    # Every 15 minutes, ~07:00–23:00 Europe/Madrid (05:00–21:00 UTC).
-    # GitHub may delay scheduled runs under load; that's fine for this.
-    - cron: "*/15 5-21 * * *"
+    # Every 5 minutes, ~07:00–23:00 Europe/Madrid (05:00–21:00 UTC).
+    # Re-armed each morning by rearm.yml; disables itself once it has alerted.
+    - cron: "*/5 5-21 * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: temperature-monitor
   cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   check:
@@ -25,6 +29,7 @@ jobs:
           python-version: "3.12"
 
       - name: Check temperature and notify on crossing
+        id: check
         env:
           WU_STATION_ID: ${{ secrets.WU_STATION_ID }}
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
@@ -44,3 +49,9 @@ jobs:
             git commit -m "Update threshold state"
             git push
           fi
+
+      - name: Pause until tomorrow morning (re-armed by rearm.yml)
+        if: steps.check.outputs.notified == 'true'
+        run: |
+          echo "Alert sent — disabling scheduled runs until rearm.yml re-enables them."
+          gh workflow disable monitor.yml

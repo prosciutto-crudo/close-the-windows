@@ -1,0 +1,38 @@
+name: Re-arm monitor
+
+# Each morning, reset the threshold state and re-enable the temperature
+# monitor (which disables itself after it sends the daily alert).
+on:
+  schedule:
+    # 05:00 UTC ≈ 07:00 Europe/Madrid (summer). Runs before the monitor window.
+    - cron: "0 5 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  rearm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reset threshold state
+        run: |
+          printf '{\n  "above": false\n}\n' > state.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          if git diff --staged --quiet; then
+            echo "State already reset — nothing to commit."
+          else
+            git commit -m "Re-arm: reset threshold state"
+            git push
+          fi
+
+      - name: Re-enable the temperature monitor
+        run: gh workflow enable monitor.yml
