@@ -1,0 +1,46 @@
+name: Temperature monitor
+
+on:
+  schedule:
+    # Every 15 minutes, ~07:00–23:00 Europe/Madrid (05:00–21:00 UTC).
+    # GitHub may delay scheduled runs under load; that's fine for this.
+    - cron: "*/15 5-21 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temperature-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check temperature and notify on crossing
+        env:
+          WU_STATION_ID: ${{ secrets.WU_STATION_ID }}
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+          THRESHOLD_C: "24"
+        run: python3 monitor.py
+
+      - name: Commit state if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          if git diff --staged --quiet; then
+            echo "State unchanged — nothing to commit."
+          else
+            git commit -m "Update threshold state"
+            git push
+          fi
