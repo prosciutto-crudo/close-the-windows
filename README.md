@@ -30,9 +30,10 @@ Nothing runs locally.
 - `data.json` holds `windows_open` (current recommendation), `notified_state`, and a
   rolling `points` array trimmed to `WINDOW_HOURS` (default 24). The workflow commits
   it every run — that's the data feed for the dashboard.
-- `.github/workflows/monitor.yml` runs **every 5 min, 24/7** (cron `*/5 * * * *`). The
-  repo is **public**, so Actions minutes are free and round-the-clock polling gives the
-  dashboard a full 24 h of data. The workflow has a manual **Run workflow** button.
+- `.github/workflows/monitor.yml` runs **every 10 min, 24/7** (cron `*/10 * * * *`). The
+  repo is **public**, so Actions minutes are free. Note GitHub's `schedule` is
+  best-effort — runs are often delayed/dropped, so the real cadence is irregular; data
+  integrity is unaffected. The workflow has a manual **Run workflow** button.
 
 > The Shelly H&T sleeps on battery (reports only on a ≥0.5 °C change, or every 2 h).
 > Keep it **USB-powered** so it reports every few minutes and the cloud value stays fresh.

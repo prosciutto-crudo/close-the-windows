@@ -2,11 +2,12 @@ name: Window monitor
 
 on:
   schedule:
-    # Every 5 minutes, 24/7. The repo is public, so Actions minutes are free;
-    # round-the-clock polling gives the dashboard a full 24h of data. Pushes are
-    # still gated to 06:00–22:00 Madrid in-script (QUIET_HOURS) — overnight runs
-    # log data silently.
-    - cron: "*/5 * * * *"
+    # Every 10 minutes, 24/7. The repo is public, so Actions minutes are free.
+    # GitHub's `schedule` is best-effort and drops very-frequent (*/5) runs under
+    # load, so */10 is a touch more reliable; cadence is irregular either way.
+    # Pushes are still gated to 06:00–22:00 Madrid in-script (QUIET_HOURS) —
+    # overnight runs log data silently.
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
 
 permissions:
