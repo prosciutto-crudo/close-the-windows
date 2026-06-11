@@ -1,22 +1,19 @@
-name: Temperature monitor
+name: Window monitor
 
 on:
   schedule:
-    # Every 5 minutes, ~07:00–23:00 Europe/Madrid (05:00–21:00 UTC).
-    # Re-armed each morning by rearm.yml; disables itself once it has alerted.
-    - cron: "*/5 5-21 * * *"
+    # Every 20 min over the Madrid daytime window. UTC 04:00–20:59 covers
+    # 06:00–22:00 Europe/Madrid across DST; monitor.py applies the precise
+    # quiet-hours guard (22:00–06:00 Madrid) in-script. ~48 runs/day.
+    - cron: "*/20 4-20 * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
-  actions: write
 
 concurrency:
-  group: temperature-monitor
+  group: window-monitor
   cancel-in-progress: false
-
-env:
-  GH_TOKEN: ${{ github.token }}
 
 jobs:
   check:
@@ -28,14 +25,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Check temperature and notify on crossing
-        id: check
+      - name: Compare indoor vs outdoor and notify on flip
         env:
           WU_STATION_ID: ${{ secrets.WU_STATION_ID }}
           WU_API_KEY: ${{ secrets.WU_API_KEY }}
+          SHELLY_SERVER: ${{ secrets.SHELLY_SERVER }}
+          SHELLY_DEVICE_ID: ${{ secrets.SHELLY_DEVICE_ID }}
+          SHELLY_AUTH_KEY: ${{ secrets.SHELLY_AUTH_KEY }}
           PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
-          THRESHOLD_C: "24"
+          MARGIN_C: "1.0"
+          # Temporary while testing: notifications can arrive any hour, and the
+          # first run pushes the current recommendation instead of init'ing quietly.
+          QUIET_HOURS: "off"
+          NOTIFY_ON_INIT: "on"
         run: python3 monitor.py
 
       - name: Commit state if it changed
@@ -46,12 +49,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "State unchanged — nothing to commit."
           else
-            git commit -m "Update threshold state"
+            git commit -m "Update window state"
             git push
           fi
-
-      - name: Pause until tomorrow morning (re-armed by rearm.yml)
-        if: steps.check.outputs.notified == 'true'
-        run: |
-          echo "Alert sent — disabling scheduled runs until rearm.yml re-enables them."
-          gh workflow disable monitor.yml
