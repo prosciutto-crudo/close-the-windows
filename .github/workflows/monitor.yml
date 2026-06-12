@@ -38,6 +38,10 @@ jobs:
           PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
           MARGIN_C: "1.0"
+          # Keep 4 days in data.json so the dashboard can overlay each past 24h
+          # window on one time-of-day axis (today bold, older days faded).
+          # history.csv stays the indefinite archive regardless of this window.
+          WINDOW_HOURS: "96"
           # Temporary while testing: pushes can arrive any hour. Flip QUIET_HOURS
           # back to "on" once you're done watching pings land.
           QUIET_HOURS: "off"
