@@ -2,12 +2,13 @@ name: Window monitor
 
 on:
   schedule:
-    # Every 10 minutes, 24/7. The repo is public, so Actions minutes are free.
-    # GitHub's `schedule` is best-effort and drops very-frequent (*/5) runs under
-    # load, so */10 is a touch more reliable; cadence is irregular either way.
+    # Every 5 minutes, 24/7. The repo is public, so Actions minutes are free.
+    # This native schedule is only a backup — GitHub's `schedule` is best-effort
+    # and drops many */5 runs under load. Reliable cadence comes from the Val Town
+    # cron pinger firing workflow_dispatch; the concurrency group dedupes overlaps.
     # Pushes are still gated to 06:00–22:00 Madrid in-script (QUIET_HOURS) —
     # overnight runs log data silently.
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -47,7 +48,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.json
+          git add data.json history.csv
           if git diff --staged --quiet; then
             echo "Data unchanged — nothing to commit."
           else

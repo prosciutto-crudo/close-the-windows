@@ -39,7 +39,8 @@ Optional:
   NOTIFY_ON_INIT  "on"/"off" — push the current recommendation on first run
   WINDOW_HOURS    rolling history window kept in data.json (default 24)
   MAX_STALE_MIN   ignore the Shelly reading if older than this (default 90)
-  DATA_FILE       path to the data file (default data.json)
+  DATA_FILE       path to the rolling 24h data file (default data.json)
+  HISTORY_FILE    path to the never-trimmed CSV archive (default history.csv)
 """
 
 import json
@@ -73,7 +74,8 @@ def flag(name: str, default: bool) -> bool:
 def get_outdoor(station_id: str, api_key: str):
     """Return (temp_c, humidity_pct) for the WU PWS."""
     query = urllib.parse.urlencode(
-        {"stationId": station_id, "format": "json", "units": "m", "apiKey": api_key}
+        {"stationId": station_id, "format": "json", "units": "m",
+         "numericPrecision": "decimal", "apiKey": api_key}
     )
     req = urllib.request.Request(f"{WU_URL}?{query}", headers={"Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as resp:
@@ -147,6 +149,26 @@ def save_data(path: str, data: dict) -> None:
         f.write("\n")
 
 
+HISTORY_HEADER = "t,iso_madrid,out_t,in_t,out_h,in_h,windows_open\n"
+
+
+def append_history(path: str, point: dict, windows_open) -> None:
+    """Append one reading to a never-trimmed CSV (the indefinite archive).
+
+    Separate from data.json (the rolling 24h dashboard feed) — this file grows
+    forever for day-over-day analysis. Writes the header once on first creation.
+    """
+    new_file = not os.path.exists(path)
+    iso = datetime.fromtimestamp(point["t"], MADRID).strftime("%Y-%m-%d %H:%M:%S")
+    fields = [point["t"], iso, point["out_t"], point["in_t"],
+              point["out_h"], point["in_h"], windows_open]
+    row = ",".join("" if v is None else str(v) for v in fields) + "\n"
+    with open(path, "a") as f:
+        if new_file:
+            f.write(HISTORY_HEADER)
+        f.write(row)
+
+
 def in_quiet_hours(now: datetime, night_start: int, night_end: int) -> bool:
     hour = now.hour
     # Window wraps past midnight (e.g. 22 -> 6): quiet if at/after start OR before end.
@@ -182,6 +204,7 @@ def main() -> None:
     window_hours = float(os.environ.get("WINDOW_HOURS", "24"))
     max_stale_min = float(os.environ.get("MAX_STALE_MIN", "90"))
     data_file = os.environ.get("DATA_FILE", "data.json")
+    history_file = os.environ.get("HISTORY_FILE", "history.csv")
 
     outdoor_t, outdoor_h = get_outdoor(station_id, wu_key)
     indoor_t, indoor_h = get_indoor(shelly_server, shelly_device, shelly_key, max_stale_min)
@@ -243,7 +266,9 @@ def main() -> None:
         "notified_state": notified,
         "points": points,
     })
-    print(f"Logged point; {len(points)} points in the last {window_hours:.0f}h.")
+    append_history(history_file, point, windows_open)
+    print(f"Logged point; {len(points)} points in the last {window_hours:.0f}h "
+          f"(+1 appended to {history_file}).")
 
 
 if __name__ == "__main__":
