@@ -1,15 +1,8 @@
 {
-  "updated": 1784490610,
-  "windows_open": false,
-  "notified_state": false,
+  "updated": 1784491519,
+  "windows_open": true,
+  "notified_state": true,
   "points": [
-    {
-      "t": 1784145631,
-      "out_t": 30.6,
-      "in_t": 27.1,
-      "out_h": 60.0,
-      "in_h": 48.7
-    },
     {
       "t": 1784146543,
       "out_t": 30.4,
@@ -3187,6 +3180,13 @@
       "in_t": 28.4,
       "out_h": 69.0,
       "in_h": 51.3
+    },
+    {
+      "t": 1784491519,
+      "out_t": 27.5,
+      "in_t": 28.5,
+      "out_h": 70.0,
+      "in_h": 51.4
     }
   ]
 }
