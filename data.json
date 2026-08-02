@@ -1,22 +1,8 @@
 {
-  "updated": 1785663349,
-  "windows_open": true,
-  "notified_state": true,
+  "updated": 1785664236,
+  "windows_open": false,
+  "notified_state": false,
   "points": [
-    {
-      "t": 1785317881,
-      "out_t": 30.9,
-      "in_t": 29.4,
-      "out_h": 53.0,
-      "in_h": 52.3
-    },
-    {
-      "t": 1785318613,
-      "out_t": 31.2,
-      "in_t": 29.4,
-      "out_h": 56.0,
-      "in_h": 52.1
-    },
     {
       "t": 1785319249,
       "out_t": 31.4,
@@ -3068,6 +3054,13 @@
       "in_t": 30.3,
       "out_h": 63.0,
       "in_h": 55.1
+    },
+    {
+      "t": 1785664236,
+      "out_t": 31.2,
+      "in_t": 30.4,
+      "out_h": 60.0,
+      "in_h": 55.0
     }
   ]
 }
