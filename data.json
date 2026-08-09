@@ -1,5 +1,5 @@
 {
-  "updated": 1786253544,
+  "updated": 1786253617,
   "windows_open": true,
   "notified_state": true,
   "points": [
@@ -3092,6 +3092,13 @@
     },
     {
       "t": 1786253544,
+      "out_t": 24.4,
+      "in_t": 26.6,
+      "out_h": 82.0,
+      "in_h": 59.2
+    },
+    {
+      "t": 1786253617,
       "out_t": 24.4,
       "in_t": 26.6,
       "out_h": 82.0,
