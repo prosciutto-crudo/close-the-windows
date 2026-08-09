@@ -22,9 +22,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -42,9 +42,11 @@ jobs:
           # window on one time-of-day axis (today bold, older days faded).
           # history.csv stays the indefinite archive regardless of this window.
           WINDOW_HOURS: "96"
-          # Temporary while testing: pushes can arrive any hour. Flip QUIET_HOURS
-          # back to "on" once you're done watching pings land.
-          QUIET_HOURS: "off"
+          # Suppress pushes 22:00–06:00 Madrid (NIGHT_START/NIGHT_END defaults).
+          # Data is still logged 24/7 — only the Pushover notification is held,
+          # and notified_state gives one catch-up push after 06:00 if the
+          # recommendation flipped overnight.
+          QUIET_HOURS: "on"
           NOTIFY_ON_INIT: "on"
         run: python3 monitor.py
 
