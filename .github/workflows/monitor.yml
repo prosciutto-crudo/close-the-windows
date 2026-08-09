@@ -55,7 +55,36 @@ jobs:
           git add data.json history.csv
           if git diff --staged --quiet; then
             echo "Data unchanged — nothing to commit."
-          else
-            git commit -m "Log reading"
-            git push
+            exit 0
           fi
+          git commit -m "Log reading"
+
+          # The native schedule and the Val Town pinger can fire within the same
+          # second; the concurrency group doesn't serialise reliably at that
+          # granularity, so both runs poll, both commit, and the slower one's
+          # push is rejected as non-fast-forward. Rebasing it on is pointless —
+          # the two readings are seconds apart (duplicates), and they'd conflict
+          # anyway (data.json is rewritten wholesale, history.csv appends at EOF).
+          # So: retry to ride out transient failures, and if the remote has
+          # genuinely moved on, drop our duplicate and finish green. Any other
+          # push failure still fails the job loudly.
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            git fetch origin main
+            if git merge-base --is-ancestor HEAD origin/main; then
+              echo "Remote already contains this commit — nothing to do."
+              exit 0
+            fi
+            if [ "$(git rev-parse HEAD~1)" != "$(git rev-parse origin/main)" ]; then
+              echo "A sibling run logged the same moment — dropping this duplicate reading."
+              git reset --hard origin/main
+              exit 0
+            fi
+            echo "Push failed but remote is unchanged — retrying (attempt $attempt)."
+            sleep 5
+          done
+          echo "::error::Could not push data after 3 attempts."
+          exit 1
