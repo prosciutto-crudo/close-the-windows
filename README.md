@@ -1,5 +1,13 @@
 # close-the-windows
 
+> [!IMPORTANT]
+> **Hibernated 2026-09-02 — wound down for the season.** The 5-minute cron is
+> removed, the Val Town pinger is inert, its PAT is revoked and the dashboard is
+> paused. Nothing polls, notifies or deploys. The data (`history.csv`, 9,288
+> readings through 2026-09-02) is intact. **See [HIBERNATION.md](HIBERNATION.md)
+> for what was switched off and the runbook to bring it back.** Everything
+> described below is how it works *when running*.
+
 Compares the **outdoor** temperature (a [Weather Underground](https://www.wunderground.com/)
 personal weather station) against the **indoor** temperature (a [Shelly H&T Gen3](https://kb.shelly.cloud/knowledge-base/shelly-h-t-gen3)
 read over the Shelly Cloud API) and sends a [Pushover](https://pushover.net/) push
