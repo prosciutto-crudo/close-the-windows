@@ -1,14 +1,17 @@
 name: Window monitor
 
 on:
-  schedule:
-    # Every 5 minutes, 24/7. The repo is public, so Actions minutes are free.
-    # This native schedule is only a backup — GitHub's `schedule` is best-effort
-    # and drops many */5 runs under load. Reliable cadence comes from the Val Town
-    # cron pinger firing workflow_dispatch; the concurrency group dedupes overlaps.
-    # Pushes are still gated to 06:00–22:00 Madrid in-script (QUIET_HOURS) —
-    # overnight runs log data silently.
-    - cron: "*/5 * * * *"
+  # HIBERNATED 2026-09-02 — the project is wound down for the season.
+  # The `schedule:` cron that ran this every 5 minutes was REMOVED so the
+  # monitor stops polling, pushing and committing data. Nothing runs on its
+  # own now; only the manual "Run workflow" button below can trigger it.
+  #
+  # To re-spin next summer, restore the schedule by uncommenting this block
+  # (and see HIBERNATION.md — the Val Town pinger and its PAT also need
+  # reviving for reliable 5-minute cadence):
+  #
+  # schedule:
+  #   - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 permissions:

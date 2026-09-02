@@ -1,0 +1,7 @@
+# Hand-entered "did the fan run overnight?" log, exported 2026-09-02 from the
+# SQLite table `fan_log` in the Val Town val prosciuttocrudo/close-the-windows-fanlog.
+# This data existed ONLY in that val — it was never part of this repo. Archived
+# here so it survives the wind-down. The val itself is left live and untouched.
+cycle,fan_ran,logged_at,logged_at_iso_madrid
+2026-06-19,1,1781847488,2026-06-19 07:38:08
+2026-06-21,1,1782021188,2026-06-21 07:53:08
